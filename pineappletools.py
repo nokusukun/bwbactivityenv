@@ -1,6 +1,5 @@
 from typing import Tuple, Any
 
-from pywallet import wallet
 from flags import Flags
 import sys
 
