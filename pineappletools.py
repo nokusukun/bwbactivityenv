@@ -1,6 +1,6 @@
 from typing import Tuple, Any
 
-from flags import Flags
+from utils.flags import Flags
 import sys
 
 from bs4 import BeautifulSoup
