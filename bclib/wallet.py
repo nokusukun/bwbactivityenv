@@ -19,6 +19,8 @@ def publicize(key):
 def validate(signature, address):
     pem = publicize(address)
     s = base64.b64decode(signature.encode()).decode().split(":")
+    assert len(s) != 3, "invalid signature structure"
+
     sig = Signature(int(s[0]), int(s[1]))
     messageHash = s[2]
 
