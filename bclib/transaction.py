@@ -54,10 +54,10 @@ class Transaction:
         return result
 
     def validate(self) -> bool:
-        return wallet.validate(self.data.source, self.signature)
+        return wallet.validate(self.signature, self.data.source)
 
     def getDataHash(self) -> str:
-        return hashlib.sha256(json.dumps(self.data).encode()).hexdigest().decode()
+        return hashlib.sha256(json.dumps(self.data.to_dict()).encode()).hexdigest()
 
     def signWithWallet(self, w: wallet.Wallet):
         assert self.data.source == w.address, "transaction sender(source) is not the wallet owner"

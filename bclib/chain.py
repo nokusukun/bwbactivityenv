@@ -3,6 +3,7 @@ import json
 
 from bclib.block import Block, block_from_dict
 from bclib.transaction import Transaction
+from bclib.wallet import Wallet
 from bclib.utils import from_str, from_int, to_class, from_list
 
 
@@ -37,6 +38,7 @@ class Chain:
             "preHash of new block is not equal to chain's last block"
 
         self.blocks.append(block)
+
 
     # Resets the chain with a genesis transaction to a specified address
     def resetAndInitialize(self, genesisAddress, value=1000000000, difficulty=3):
@@ -78,6 +80,9 @@ class Chain:
                 if tx.data.destination == address or tx.data.source == address
             ])
         return balance
+
+    def getWalletFunds(self, w: Wallet) -> int:
+        return self.getBalance(w.address)
 
     @property
     def lastBlock(self):

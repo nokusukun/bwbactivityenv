@@ -2,3 +2,4 @@ flask
 starkbank-ecdsa
 requests
 bs4
+notebook
