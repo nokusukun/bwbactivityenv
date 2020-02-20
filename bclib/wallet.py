@@ -25,7 +25,7 @@ def validate(signature, address):
     messageHash = s[2]
 
     pubKey = PublicKey.fromPem(pem)
-    return Ecdsa.verify(messageHash, sig, pubKey)
+    return Ecdsa.verify(messageHash, sig, pubKey), messageHash
 
 
 class Wallet:

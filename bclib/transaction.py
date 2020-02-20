@@ -54,7 +54,8 @@ class Transaction:
         return result
 
     def validate(self) -> bool:
-        return wallet.validate(self.signature, self.data.source)
+        verify, extractedHash = wallet.validate(self.signature, self.data.source)
+        return all([verify, extractedHash == self.hash()])
 
     def hash(self) -> str:
         return hashlib.sha256(json.dumps(self.data.to_dict()).encode()).hexdigest()

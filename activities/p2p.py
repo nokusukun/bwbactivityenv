@@ -7,7 +7,7 @@ import requests
 app = Flask(__name__)
 
 # Generate a globally unique address for this node
-node_identifier = secrets.token_hex(4)
+node_identifier = "@noku"
 
 nodes = {}
 args = None
@@ -44,6 +44,19 @@ def send(identifier, message):
 
     return jsonify(response.json())
 
+## ~~ cut here ~~
+
+@app.route("/broadcast/<message>")
+def broadcast(message):
+    for id, host in nodes.items():
+        response = requests.post("http://" + host + "/mail/rec", json={
+            "message": message,
+            "source": node_identifier
+        })
+
+    return "OK! :)"
+
+## ~~ end cut here ~~
 
 @app.route("/mail/rec", methods=["POST"])
 def recmail():
