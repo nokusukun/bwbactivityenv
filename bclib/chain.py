@@ -6,6 +6,7 @@ from bclib.transaction import Transaction
 from bclib.wallet import Wallet
 from bclib.utils import from_str, from_int, to_class, from_list
 
+import arrow
 
 class Chain:
     def __init__(self):
@@ -38,7 +39,6 @@ class Chain:
             "preHash of new block is not equal to chain's last block"
 
         self.blocks.append(block)
-
 
     # Resets the chain with a genesis transaction to a specified address
     def resetAndInitialize(self, genesisAddress, value=1000000000, difficulty=3):
@@ -80,6 +80,28 @@ class Chain:
                 if tx.data.destination == address or tx.data.source == address
             ])
         return balance
+
+    # Complete this!
+    # The function basically iterates through the nonce until block.export().hash accomplishes the difficulty
+    def mineBlock(self):
+        # sets the initial variables
+        mined = False
+        nonce = 0
+
+        while not mined:
+            block = Block.from_dict(dict(
+                data=dict(
+                    difficulty=self.lastBlock.data.difficulty,
+                    nonce=nonce,
+                    blockNo=self.lastBlock.data.blockNo + 1,
+                    prevHash=self.lastBlock.data.prevHash,
+                    transactions=self.pendingTx,
+                    timestamp=arrow.now().timestamp
+                ),
+                hash="",
+            ))
+            # block.export().hash would return the block hash
+
 
     def getWalletFunds(self, w: Wallet) -> int:
         return self.getBalance(w.address)
