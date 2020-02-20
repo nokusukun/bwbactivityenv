@@ -42,3 +42,6 @@ class Wallet:
 
     def verify(self, signature):
         return validate(signature, self.address)
+
+    def __repr__(self):
+        return f'<Wallet address="{self.address}">'
