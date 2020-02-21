@@ -13,7 +13,7 @@ class TransactionData:
     source: str
     destination: str
     value: int
-    timestamp: str
+    timestamp: int
 
     @staticmethod
     def from_dict(obj: Any) -> 'TransactionData':
@@ -21,7 +21,7 @@ class TransactionData:
         source = from_str(obj.get("source"))
         destination = from_str(obj.get("destination"))
         value = from_int(obj.get("value"))
-        ts = from_str(obj.get("timestamp"))
+        ts = from_int(obj.get("timestamp"))
         return TransactionData(source, destination, value, ts)
 
     def to_dict(self) -> dict:
@@ -29,7 +29,7 @@ class TransactionData:
         result["source"] = from_str(self.source)
         result["destination"] = from_str(self.destination)
         result["value"] = from_int(self.value)
-        result["timestamp"] = from_str(self.timestamp)
+        result["timestamp"] = from_int(self.timestamp)
         return result
 
 
@@ -63,3 +63,6 @@ class Transaction:
     def signWithWallet(self, w: wallet.Wallet):
         assert self.data.source == w.address, "transaction sender(source) is not the wallet owner"
         self.signature = w.sign(self.hash())
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict())

@@ -15,7 +15,7 @@ class BlockData:
     blockNo: int
     prevHash: str
     transactions: List[Transaction]
-    timestamp: str
+    timestamp: int
 
     @staticmethod
     def from_dict(obj: Any) -> 'BlockData':
@@ -25,7 +25,7 @@ class BlockData:
         blockNo = from_int(obj.get("blockNo"))
         prevHash = from_str(obj.get("prevHash"))
         transactions = from_list(Transaction.from_dict, obj.get("transactions"))
-        timestamp = from_str(obj.get("timestamp"))
+        timestamp = from_int(obj.get("timestamp"))
         return BlockData(nonce, difficulty, blockNo, prevHash, transactions, timestamp)
 
     def to_dict(self) -> dict:
@@ -35,7 +35,7 @@ class BlockData:
         result["blockNo"] = from_int(self.blockNo)
         result["prevHash"] = from_str(self.prevHash)
         result["transactions"] = from_list(lambda x: to_class(Transaction, x), self.transactions)
-        result["timestamp"] = from_str(self.timestamp)
+        result["timestamp"] = from_int(self.timestamp)
         return result
 
 
