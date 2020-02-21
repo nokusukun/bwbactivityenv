@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.4/js/all.js"></script>
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-animate.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+    <title>BCB Workshop • noku.pw</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js" integrity="sha256-3blsJd4Hli/7wCQ+bmgXfOdK7p/ZUMtPXY08jmxSSgk=" crossorigin="anonymous"></script>
+    <style>
+        .main-container {
+            margin: 1em;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panels {
+            padding-top: 1.3em;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+        .panels .panel {
+            width: 30%;
+        }
+
+        .node-item {
+            display: flex;
+            font-family: monospace;
+        }
+
+        .node-item .node-id {
+            font-weight: bold;
+            padding-right: 2em;
+        }
+
+        .block .transaction {
+            padding-left: 0.5em;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wrapped {
+            max-width: 100%;
+            overflow-wrap: break-word;
+        }
+
+        .transaction {
+            padding: 1em 0;
+        }
+    </style>
+
+</head>
+
+<body class="" ng-app="bcb-net" ng-controller="bcbNetCtrl">
+    <div class="main-container">
+        <div class="panels">
+            <div class="panel">
+                <h2>Nodes</h2>
+                <div class="config">
+                    <div class="input-group flex-nowrap">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="addon-wrapping">@</span>
+                        </div>
+                        <input type="text" class="form-control"  ng-model="api" placeholder="Address">
+                        <button class="btn btn-primary" ng-click="getStatus()"> Connect </button>
+                    </div>
+                </div>
+                <div ng-repeat="(id, host) in cNodes" class="node-item">
+                    <span ng-if="id === me">(me)</span><span class="node-id">{{ id }}</span> <span>{{ host }}</span>
+                </div>
+            </div>
+            <div class="panel">
+                <h2>Pending Transactions</h2>
+                <textarea ng-model="txjson" style="width: 95%"></textarea>
+                <button class="btn btn-primary" ng-click="broadcasttx()">Broadcast transcation</button>
+                <div class="config">
+                    <div class="input-group flex-nowrap">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="addon-wrapping">@</span>
+                        </div>
+                        <input type="text" class="form-control"  ng-model="minerWallet" placeholder="Address">
+                        <button class="btn btn-primary" ng-click="mineTransactions()"> Mine Transactions </button>
+                    </div>
+                </div>
+                <div class="transaction" ng-repeat="tx in chain.pending">
+                    <div class="wrapped"><b>Signature:</b> {{ tx.signature }}</div>
+                    <div class="wrapped"><b>Sender:</b> {{ tx.data.source }}</div>
+                    <div class="wrapped"><b>Reciever:</b> {{ tx.data.destination }}</div>
+                    <span><b>Value:</b> {{ tx.data.value }}</span>
+                </div>
+            </div>
+            <div class="panel">
+                <h2>Blockchain Stats</h2>
+                <div class="config">
+                    <div class="input-group flex-nowrap">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="addon-wrapping">@</span>
+                        </div>
+                        <input type="text" class="form-control"  ng-model="genesisAddress" placeholder="Address">
+                        <button class="btn btn-primary" ng-click="resetAndInit()"> Initialize Blockchain </button>
+                    </div>
+                </div>
+                <div class="config">
+                    <div class="input-group flex-nowrap">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="addon-wrapping">@</span>
+                        </div>
+                        <input type="text" class="form-control"  ng-model="balanceAddress" placeholder="Address">
+                        <button class="btn btn-primary" ng-click="getBalance()"> Get Address Balance </button>
+                    </div>
+                </div>
+                <div ng-repeat="block in chain.blocks" class="block">
+                    <span><b>Block</b></span>
+                    <div class="hash wrapped">{{ block.hash }}</div>
+                    <span><b>Transactions</b></span>
+                    <div class="transaction" ng-repeat="tx in block.data.transactions">
+                        <span><b>Signature:</b> {{ tx.signature }}</span>
+                        <div class="wrapped"><b>Sender:</b> {{ tx.data.source }}</div>
+                        <div class="wrapped"><b>Reciever:</b> {{ tx.data.destination }}</div>
+                        <span><b>Value:</b> {{ tx.data.value }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+  var app = angular.module('bcb-net', []);
+
+
+  app.controller('bcbNetCtrl', function ($scope, $http, $timeout) {
+      $scope.api = "localhost:5000";
+
+      $scope.broadcasttx = () => {
+          if (!$scope.txjson) {
+              alert("transaction is empty!");
+              return
+          }
+
+          $http.post(`http://${$scope.api}/chain/tx/add`, JSON.parse($scope.txjson)).then( r => {
+              if (r.data.error) {
+                  alert(`Failed: ${r.data.error}`)
+              } else {
+                  alert("Success!")
+              }
+              $scope.getStatus();
+          });
+      };
+
+      $scope.mineTransactions = () => {
+          if (!$scope.minerWallet) {
+              alert("miner address is empty!");
+              return
+          }
+          $http.post(`http://${$scope.api}/chain/mine`, {
+              minerAddress: $scope.minerWallet
+          }).then( r => {
+              if (r.data.error) {
+                  alert(`Failed: ${r.data.error}`)
+              }
+              $scope.balanceAddress = r.data.value;
+              $scope.getStatus();
+          });
+      };
+
+      $scope.getBalance = () => {
+          if (!$scope.balanceAddress) {
+              alert("address is empty!");
+              return
+          }
+          $http.post(`http://${$scope.api}/chain/balance`, {
+              address: $scope.balanceAddress
+          }).then( r => {
+              if (r.data.error) {
+                  alert(`Failed: ${r.data.error}`)
+              }
+              $scope.balanceAddress = r.data.value;
+              $scope.getStatus();
+          });
+      };
+
+      $scope.resetAndInit = () => {
+
+          $http.post(`http://${$scope.api}/chain/initialize`, {
+              address: $scope.genesisAddress
+          }).then( r => {
+              $scope.getStatus();
+          });
+      };
+
+      $scope.getStatus = () => {
+          console.log("Calling api");
+          $http.get(`http://${$scope.api}/status`).then(r => {
+              console.log(r);
+              $scope.data = r.data;
+              $scope.cNodes = $scope.data.connectedNodes;
+              $scope.me = $scope.data.identifier;
+              $scope.messages = $scope.data.messages;
+              $scope.chain = $scope.data.chain;
+          })
+      }
+
+  });
+
+</script>
+
+</html>
